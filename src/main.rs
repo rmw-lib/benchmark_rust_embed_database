@@ -48,10 +48,24 @@ pub fn run<const N: usize>() -> Result<()> {
     println!("\n{filename}");
     let dbpath = dir.join(filename);
     let _ = remove_dir_all(&dbpath);
-    let mut opts = rocksdb::Options::default();
-    opts.create_if_missing(true);
-    opts.set_use_fsync(false);
-    let db = Arc::new(rocksdb::DB::open(&opts, dbpath)?);
+    let mut opt = rocksdb::Options::default();
+    opt.create_if_missing(true);
+    opt.set_max_open_files(10000);
+    opt.set_use_fsync(false);
+    opt.set_bytes_per_sync(8388608);
+    opt.optimize_for_point_lookup(1024);
+    opt.set_table_cache_num_shard_bits(6);
+    opt.set_max_write_buffer_number(32);
+    opt.set_write_buffer_size(536870912);
+    opt.set_target_file_size_base(1073741824);
+    opt.set_min_write_buffer_number_to_merge(4);
+    opt.set_level_zero_stop_writes_trigger(2000);
+    opt.set_level_zero_slowdown_writes_trigger(0);
+    opt.set_compaction_style(rocksdb::DBCompactionStyle::Universal);
+    opt.set_max_background_compactions(4);
+    opt.set_max_background_flushes(4);
+    opt.set_disable_auto_compactions(true);
+    let db = Arc::new(rocksdb::DB::open(&opt, dbpath)?);
 
     elapsed!(insert, |kv| -> Result<()> {
       let [k, v] = kv;
