@@ -42,13 +42,16 @@ pub fn run<const N: usize>() -> Result<()> {
       Ok::<_, anyhow::Error>(())
     }?};
   }
+
   {
     let filename = "rocksdb";
     println!("\n{filename}");
     let dbpath = dir.join(filename);
     let _ = remove_dir_all(&dbpath);
-
-    let db = Arc::new(rocksdb::DB::open_default(dbpath)?);
+    let mut opts = rocksdb::Options::default();
+    opts.create_if_missing(true);
+    opts.set_use_fsync(false);
+    let db = Arc::new(rocksdb::DB::open(&opts, dbpath)?);
 
     elapsed!(insert, |kv| -> Result<()> {
       let [k, v] = kv;
@@ -155,5 +158,5 @@ pub fn run<const N: usize>() -> Result<()> {
 }
 
 fn main() -> Result<()> {
-  run::<30000>()
+  run::<10000>()
 }
