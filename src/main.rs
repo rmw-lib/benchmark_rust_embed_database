@@ -2,17 +2,16 @@
 
 use anyhow::Result;
 use parking_lot::Mutex;
-use persy::{Config, Persy, TransactionConfig, ValueMode};
 use rand::Rng;
 use rayon::prelude::*;
 use std::sync::Arc;
 use std::{
+  collections::HashMap,
   env,
   fs::File,
-  fs::{create_dir_all, remove_dir_all, remove_file},
+  fs::{remove_dir_all, remove_file},
   io::Write,
   mem::MaybeUninit,
-  ops::Try,
   time::Instant,
 };
 
@@ -45,6 +44,7 @@ pub fn run<const N: usize>() -> Result<()> {
   }
 
   {
+    use persy::{Config, Persy, TransactionConfig, ValueMode};
     let filename = "persy";
     println!("{filename}");
     let dbpath = dir.join(filename);
@@ -97,11 +97,31 @@ pub fn run<const N: usize>() -> Result<()> {
     elapsed!(get, |kv| -> Result<()> {
       let [k, _] = kv;
       if let Some(i) = db.get(&k.to_be_bytes())? {
-        file.lock().write_all(i.as_ref().try_into().unwrap())?;
+        file.lock().write_all(&i.as_ref())?;
       }
       Ok(())
     });
   }
+  {
+    println!("HashMap");
+    let db = Arc::new(Mutex::new(HashMap::new()));
+
+    elapsed!(insert, |kv| -> Result<()> {
+      let [k, v] = kv;
+      db.lock().insert(k, v);
+      Ok(())
+    });
+
+    let file = Arc::new(Mutex::new(File::create(dir.join("out"))?));
+    elapsed!(get, |kv| -> Result<()> {
+      let [k, _] = kv;
+      if let Some(i) = db.lock().get(&k) {
+        file.lock().write_all(&i.to_le_bytes())?;
+      }
+      Ok(())
+    });
+  }
+
   Ok(())
 }
 
