@@ -48,17 +48,18 @@ pub fn run<const N: usize>() -> Result<()> {
     let dbpath = dir.join(filename);
     let _ = remove_dir_all(&dbpath);
 
-    let db = Arc::new(DB::open_default(dbpath)?)?;
+    let db = Arc::new(rocksdb::DB::open_default(dbpath)?);
 
     elapsed!(insert, |kv| -> Result<()> {
       let [k, v] = kv;
       db.put(&k.to_be_bytes(), &v.to_le_bytes())?;
       Ok(())
     });
+
     let file = Arc::new(Mutex::new(File::create(dir.join("out"))?));
     elapsed!(get, |kv| -> Result<()> {
       let [k, _] = kv;
-      if let Some(i) = db.get(&k.to_be_bytes())? {
+      if let Some(i) = db.get_pinned(&k.to_be_bytes())? {
         file.lock().write_all(&i)?;
       }
       Ok(())
