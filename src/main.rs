@@ -144,7 +144,7 @@ pub fn run<const N: usize>() -> Result<()> {
 
   macro_rules! map {
     ($name:ident) => {
-      println!("# {}", concat!("\n", stringify!($name)));
+      println!("\n# {}", stringify!($name));
       let db = Arc::new(Mutex::new($name::new()));
 
       elapsed!(insert, |kv| -> Result<()> {
