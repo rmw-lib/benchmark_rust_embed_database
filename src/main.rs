@@ -46,7 +46,7 @@ pub fn run<const N: usize>() -> Result<()> {
   {
     use persy::{Config, Persy, TransactionConfig, ValueMode};
     let filename = "persy";
-    println!("{filename}");
+    println!("\n{filename}");
     let dbpath = dir.join(filename);
     let _ = remove_file(&dbpath);
 
@@ -83,7 +83,7 @@ pub fn run<const N: usize>() -> Result<()> {
 
   {
     let filename = "sled";
-    println!("{filename}");
+    println!("\n{filename}");
     let dbpath = dir.join(filename);
     let _ = remove_dir_all(&dbpath);
 
@@ -104,7 +104,7 @@ pub fn run<const N: usize>() -> Result<()> {
   }
   macro_rules! map {
     ($name:ident) => {
-      println!(stringify!($name));
+      println!(concat!("\n", stringify!($name)));
       let db = Arc::new(Mutex::new($name::new()));
 
       elapsed!(insert, |kv| -> Result<()> {
