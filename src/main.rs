@@ -102,6 +102,7 @@ pub fn run<const N: usize>() -> Result<()> {
       Ok(())
     });
   }
+
   macro_rules! map {
     ($name:ident) => {
       println!(concat!("\n", stringify!($name)));
@@ -131,5 +132,5 @@ pub fn run<const N: usize>() -> Result<()> {
 }
 
 fn main() -> Result<()> {
-  run::<20000>()
+  run::<30000>()
 }

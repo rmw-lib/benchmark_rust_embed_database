@@ -10,4 +10,5 @@ parking_lot = "0.12.0"
 persy = { version = "1.2.6", features = ["background_ops"] }
 rand = "0.8.5"
 rayon = "1.5.3"
+rocksdb = { version = "0.18.0", features = ["zstd"], default-features = false }
 sled = "0.34.7"
