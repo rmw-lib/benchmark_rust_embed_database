@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 anyhow = "1.0.57"
-persy = "1.2.6"
+persy = { version = "1.2.6", features = ["background_ops"] }
+rand = "0.8.5"
