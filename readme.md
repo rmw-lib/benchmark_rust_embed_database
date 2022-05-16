@@ -1,20 +1,20 @@
 
-rocksdb
-insert 222222 rec/s
-get 151515 rec/s
+# rocksdb
+* insert 212765 rec/s
+* get 158730 rec/s
 
-persy
-insert 4649 rec/s
-get 46082 rec/s
+# persy
+* insert 4683 rec/s
+* get 50000 rec/s
 
-sled
-insert 666666 rec/s
-get 133333 rec/s
-
+# sled
+* insert 588235 rec/s
+* get 128205 rec/s
+# 
 BTreeMap
-insert 2000000 rec/s
-get 175438 rec/s
-
+* insert 2500000 rec/s
+* get 175438 rec/s
+# 
 HashMap
-insert 5000000 rec/s
-get 192307 rec/s
+* insert 5000000 rec/s
+* get 208333 rec/s

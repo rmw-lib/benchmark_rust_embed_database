@@ -35,7 +35,7 @@ pub fn run<const N: usize>() -> Result<()> {
       li.into_par_iter().try_for_each($func)?;
       let elapsed = now.elapsed();
       println!(
-        "{} {} rec/s",
+        "* {} {} rec/s",
         stringify!($op),
         (1000.0 * N as f64 / elapsed.as_millis() as f64) as u64
       );
@@ -45,7 +45,7 @@ pub fn run<const N: usize>() -> Result<()> {
 
   {
     let filename = "rocksdb";
-    println!("\n{filename}");
+    println!("\n# {filename}");
     let dbpath = dir.join(filename);
     let _ = remove_dir_all(&dbpath);
     let mut opt = rocksdb::Options::default();
@@ -85,7 +85,7 @@ pub fn run<const N: usize>() -> Result<()> {
   {
     use persy::{Config, Persy, TransactionConfig, ValueMode};
     let filename = "persy";
-    println!("\n{filename}");
+    println!("\n# {filename}");
     let dbpath = dir.join(filename);
     let _ = remove_file(&dbpath);
 
@@ -122,7 +122,7 @@ pub fn run<const N: usize>() -> Result<()> {
 
   {
     let filename = "sled";
-    println!("\n{filename}");
+    println!("\n# {filename}");
     let dbpath = dir.join(filename);
     let _ = remove_dir_all(&dbpath);
 
@@ -144,7 +144,7 @@ pub fn run<const N: usize>() -> Result<()> {
 
   macro_rules! map {
     ($name:ident) => {
-      println!(concat!("\n", stringify!($name)));
+      println!("# {}", concat!("\n", stringify!($name)));
       let db = Arc::new(Mutex::new($name::new()));
 
       elapsed!(insert, |kv| -> Result<()> {
