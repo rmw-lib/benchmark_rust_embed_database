@@ -6,7 +6,7 @@ use rand::Rng;
 use rayon::prelude::*;
 use std::sync::Arc;
 use std::{
-  collections::HashMap,
+  collections::{BTreeMap, HashMap},
   env,
   fs::File,
   fs::{remove_dir_all, remove_file},
@@ -102,25 +102,30 @@ pub fn run<const N: usize>() -> Result<()> {
       Ok(())
     });
   }
-  {
-    println!("HashMap");
-    let db = Arc::new(Mutex::new(HashMap::new()));
+  macro_rules! map {
+    ($name:ident) => {
+      println!(stringify!($name));
+      let db = Arc::new(Mutex::new($name::new()));
 
-    elapsed!(insert, |kv| -> Result<()> {
-      let [k, v] = kv;
-      db.lock().insert(k, v);
-      Ok(())
-    });
+      elapsed!(insert, |kv| -> Result<()> {
+        let [k, v] = kv;
+        db.lock().insert(k, v);
+        Ok(())
+      });
 
-    let file = Arc::new(Mutex::new(File::create(dir.join("out"))?));
-    elapsed!(get, |kv| -> Result<()> {
-      let [k, _] = kv;
-      if let Some(i) = db.lock().get(&k) {
-        file.lock().write_all(&i.to_le_bytes())?;
-      }
-      Ok(())
-    });
+      let file = Arc::new(Mutex::new(File::create(dir.join("out"))?));
+      elapsed!(get, |kv| -> Result<()> {
+        let [k, _] = kv;
+        if let Some(i) = db.lock().get(&k) {
+          file.lock().write_all(&i.to_le_bytes())?;
+        }
+        Ok(())
+      });
+    };
   }
+
+  map!(BTreeMap);
+  map!(HashMap);
 
   Ok(())
 }
