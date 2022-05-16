@@ -62,8 +62,7 @@ pub fn run<const N: usize>() -> Result<()> {
     opt.set_level_zero_stop_writes_trigger(2000);
     opt.set_level_zero_slowdown_writes_trigger(0);
     opt.set_compaction_style(rocksdb::DBCompactionStyle::Universal);
-    opt.set_max_background_compactions(4);
-    opt.set_max_background_flushes(4);
+    opt.set_max_background_jobs(4);
     opt.set_disable_auto_compactions(true);
     let db = Arc::new(rocksdb::DB::open(&opt, dbpath)?);
 
