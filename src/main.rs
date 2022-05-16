@@ -1,12 +1,16 @@
 #![feature(try_trait_v2)]
 
 use anyhow::Result;
+use parking_lot::Mutex;
 use persy::{Config, Persy, TransactionConfig, ValueMode};
 use rand::Rng;
 use rayon::prelude::*;
+use std::sync::Arc;
 use std::{
   env,
+  fs::File,
   fs::{create_dir_all, remove_dir_all, remove_file},
+  io::Write,
   mem::MaybeUninit,
   ops::Try,
   time::Instant,
@@ -87,11 +91,11 @@ pub fn run<const N: usize>() -> Result<()> {
       db.insert(&k.to_be_bytes(), &v.to_le_bytes())?;
       Ok(())
     });
+    let file = Arc::new(Mutex::new(File::create(dir.join("out"))?));
     elapsed!(get, |kv| -> Result<()> {
       let [k, _] = kv;
-      let mut n: u64 = 0;
       if let Some(i) = db.get(&k.to_be_bytes())? {
-        n = n.wrapping_add(u64::from_le_bytes(i.as_ref().try_into().unwrap()))
+        file.lock().write_all(i.as_ref().try_into().unwrap())?;
       }
       Ok(())
     });
