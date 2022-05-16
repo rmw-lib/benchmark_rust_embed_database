@@ -35,7 +35,7 @@ pub fn run<const N: usize>() -> Result<()> {
       li.into_par_iter().try_for_each($func)?;
       let elapsed = now.elapsed();
       println!(
-        "{} insert {:.2} rec/s",
+        "{} {:.2} rec/s",
         stringify!($op),
         1000.0 * N as f64 / elapsed.as_millis() as f64
       );
