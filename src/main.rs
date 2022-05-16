@@ -67,13 +67,15 @@ pub fn run<const N: usize>() -> Result<()> {
       Ok(())
     });
 
+    let file = Arc::new(Mutex::new(File::create(dir.join("out"))?));
     elapsed!(get, |kv| -> Result<()> {
       let [k, _] = kv;
-      let mut n: u64 = 0;
       for (_, vli) in db.range::<u64, u64, _>(index::test, k..k + 1)? {
         for i in vli {
-          n = n.wrapping_add(i);
+          file.lock().write_all(&i.to_le_bytes())?;
+          break;
         }
+        break;
       }
       Ok(())
     });
