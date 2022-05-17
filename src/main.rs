@@ -171,9 +171,26 @@ pub fn run<const N: usize>() -> Result<()> {
     opt.set_disable_auto_compactions(true);
     opt.set_compression_type(DBCompressionType::Zstd);
     opt.set_bottommost_compression_type(DBCompressionType::Zstd);
-    opt.set_bottommost_zstd_max_train_bytes(1 << 18, true); // 256KB
-    opt.set_zstd_max_train_bytes(1 << 18); // 256KB
-    opt.set_compression_options(4, 5, 6, 1 << 14);
+    opt.increase_parallelism(num_cpus::get() as i32);
+    opt.set_keep_log_file_num(3);
+    opt.set_level_compaction_dynamic_level_bytes(true);
+    opt.set_max_total_wal_size(512 << 20);
+    opt.set_compaction_readahead_size(32 << 20);
+    opt.set_skip_stats_update_on_db_open(true);
+    opt.set_compression_per_level(&[
+      DBCompressionType::Lz4,
+      DBCompressionType::Lz4,
+      DBCompressionType::Lz4,
+      DBCompressionType::Zstd,
+      DBCompressionType::Zstd,
+      DBCompressionType::Zstd,
+      DBCompressionType::Zstd,
+    ]);
+    let dict_size = 16384;
+    let max_train_bytes = dict_size * 128;
+    opt.set_compression_options(4, 5, 6, dict_size);
+    opt.set_zstd_max_train_bytes(max_train_bytes);
+    opt.set_bottommost_zstd_max_train_bytes(max_train_bytes, true);
 
     let db = Arc::new(rocksdb::DB::open(&opt, dbpath)?);
 

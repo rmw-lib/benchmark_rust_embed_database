@@ -70,6 +70,7 @@ dependencies = [
  "btree-slab",
  "dashmap",
  "duckdb",
+ "num_cpus",
  "parking_lot 0.12.0",
  "persy",
  "r2d2",

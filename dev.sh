@@ -4,8 +4,6 @@ _DIR=$(dirname $(realpath "$0"))
 
 cd $_DIR
 
-. ./sh/pid.sh
-
 set -ex
 
 if ! hash watchexec 2>/dev/null; then
