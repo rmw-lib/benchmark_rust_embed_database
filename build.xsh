@@ -34,4 +34,8 @@ strip @(out)
 
 #./sh/upx.sh
 #upx --best --lzma @(out)
-./@(out) | tee readme.md
+./@(out) | tee out.log
+
+cat mac.md out.log > readme.md
+
+rm out.log
