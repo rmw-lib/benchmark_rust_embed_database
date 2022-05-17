@@ -167,16 +167,16 @@ pub fn run<const N: usize>() -> Result<()> {
     opt.set_level_zero_stop_writes_trigger(2000);
     opt.set_level_zero_slowdown_writes_trigger(0);
     opt.set_compaction_style(DBCompactionStyle::Universal);
-    opt.set_max_background_jobs(4);
+    opt.set_max_background_jobs(3);
     opt.set_disable_auto_compactions(true);
     opt.set_compression_type(DBCompressionType::Zstd);
     opt.set_bottommost_compression_type(DBCompressionType::Zstd);
-    opt.increase_parallelism(num_cpus::get() as i32);
-    opt.set_keep_log_file_num(3);
+    opt.increase_parallelism(num_cpus::get() as _);
+    opt.set_keep_log_file_num(16);
     opt.set_level_compaction_dynamic_level_bytes(true);
     opt.set_max_total_wal_size(512 << 20);
     opt.set_compaction_readahead_size(32 << 20);
-    opt.set_skip_stats_update_on_db_open(true);
+    opt.set_skip_stats_update_on_db_open(false);
     opt.set_compression_per_level(&[
       DBCompressionType::Lz4,
       DBCompressionType::Lz4,
@@ -187,8 +187,9 @@ pub fn run<const N: usize>() -> Result<()> {
       DBCompressionType::Zstd,
     ]);
     let dict_size = 16384;
-    let max_train_bytes = dict_size * 128;
+    let max_train_bytes = dict_size * 256;
     opt.set_compression_options(4, 5, 6, dict_size);
+    opt.set_bottommost_compression_options(4, 5, 6, dict_size, true);
     opt.set_zstd_max_train_bytes(max_train_bytes);
     opt.set_bottommost_zstd_max_train_bytes(max_train_bytes, true);
 

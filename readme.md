@@ -12,41 +12,41 @@
 没加 mdbx、lmdb 的测试，因为我感觉这种数据库在手机上数据一大就会被杀掉，尤其是苹果的手机 ( [Блеск и нищета key-value базы данных LMDB в приложениях для iOS](https://habr.com/ru/company/vk/blog/480850/) )。
 
 # yakv
-* insert 3.259 万次/秒
-* get 74.440 万次/秒
+* insert 3.337 万次/秒
+* get 65.069 万次/秒
 
 # rusty_leveldb
-* insert 64.710 万次/秒
-* get 80.860 万次/秒
+* insert 72.011 万次/秒
+* get 89.962 万次/秒
 
 # duckdb
-* insert 0.794 万次/秒
-* get 2.402 万次/秒
+* insert 0.745 万次/秒
+* get 2.373 万次/秒
 
 # rocksdb
-* insert 14.632 万次/秒
-* get 375.488 万次/秒
+* insert 20.021 万次/秒
+* get 411.522 万次/秒
 
 # persy
-* insert 0.425 万次/秒
-* get 6.028 万次/秒
+* insert 0.467 万次/秒
+* get 6.042 万次/秒
 
 # sled
-* insert 39.807 万次/秒
-* get 229.160 万次/秒
+* insert 51.904 万次/秒
+* get 426.553 万次/秒
 
 # BTreeMap<u64, u64>
-* insert 222.473 万次/秒
-* get 461.114 万次/秒
+* insert 122.171 万次/秒
+* get 336.931 万次/秒
 
 # HashMap<u64, u64>
-* insert 342.796 万次/秒
-* get 305.308 万次/秒
+* insert 335.859 万次/秒
+* get 452.713 万次/秒
 
 # btree_slab::BTreeMap<u64, u64>
-* insert 153.272 万次/秒
-* get 401.685 万次/秒
+* insert 138.566 万次/秒
+* get 274.748 万次/秒
 
 # dashmap
-* insert 1573.386 万次/秒
-* get 1978.905 万次/秒
+* insert 1817.878 万次/秒
+* get 2458.664 万次/秒
