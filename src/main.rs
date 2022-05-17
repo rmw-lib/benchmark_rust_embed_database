@@ -155,43 +155,33 @@ pub fn run<const N: usize>() -> Result<()> {
     use rocksdb::{DBCompactionStyle, DBCompressionType, Options};
     let mut opt = Options::default();
     opt.create_if_missing(true);
-    opt.set_max_open_files(10000);
     opt.set_use_fsync(false);
-    opt.set_bytes_per_sync(8388608);
-    opt.optimize_for_point_lookup(1024);
-    opt.set_table_cache_num_shard_bits(6);
-    opt.set_max_write_buffer_number(32);
-    opt.set_write_buffer_size(536870912);
-    opt.set_target_file_size_base(1073741824);
-    opt.set_min_write_buffer_number_to_merge(4);
-    opt.set_level_zero_stop_writes_trigger(2000);
-    opt.set_level_zero_slowdown_writes_trigger(0);
     opt.set_compaction_style(DBCompactionStyle::Universal);
-    opt.set_max_background_jobs(3);
-    opt.set_disable_auto_compactions(true);
-    opt.set_compression_type(DBCompressionType::Zstd);
-    opt.set_bottommost_compression_type(DBCompressionType::Zstd);
+    opt.set_max_background_jobs(4);
+    opt.set_disable_auto_compactions(false);
     opt.increase_parallelism(num_cpus::get() as _);
     opt.set_keep_log_file_num(16);
     opt.set_level_compaction_dynamic_level_bytes(true);
-    opt.set_max_total_wal_size(512 << 20);
-    opt.set_compaction_readahead_size(32 << 20);
-    opt.set_skip_stats_update_on_db_open(false);
-    opt.set_compression_per_level(&[
-      DBCompressionType::Lz4,
-      DBCompressionType::Lz4,
-      DBCompressionType::Lz4,
-      DBCompressionType::Zstd,
-      DBCompressionType::Zstd,
-      DBCompressionType::Zstd,
-      DBCompressionType::Zstd,
-    ]);
-    let dict_size = 16384;
-    let max_train_bytes = dict_size * 256;
-    opt.set_compression_options(4, 5, 6, dict_size);
-    opt.set_bottommost_compression_options(4, 5, 6, dict_size, true);
-    opt.set_zstd_max_train_bytes(max_train_bytes);
-    opt.set_bottommost_zstd_max_train_bytes(max_train_bytes, true);
+    /*
+    RocksDB documenation says that 16KB is a typical dictionary size.
+    We've empirically tuned the dicionary size to twice of that 'typical' size.
+    Having train data size x100 from dictionary size is a recommendation from RocksDB.
+    See: https://rocksdb.org/blog/2021/05/31/dictionary-compression.html?utm_source=dbplatz
+     */
+    let dict_size = 2 * 16384;
+    let max_train_bytes = dict_size * 128;
+
+    /*
+    We use default parameters of RocksDB here:
+    window_bits is -14 and is unused (Zlib-specific parameter),
+    compression_level is 32767 meaning the default compression level for ZSTD,
+    compression_strategy is 0 and is unused (Zlib-specific parameter).
+    See: https://github.com/facebook/rocksdb/blob/main/include/rocksdb/advanced_options.h#L176:
+    */
+    opt.set_compression_type(DBCompressionType::Zstd);
+    opt.set_bottommost_compression_type(DBCompressionType::Zstd);
+    opt.set_bottommost_compression_options(-14, 32767, 0, dict_size * 32, true);
+    opt.set_bottommost_zstd_max_train_bytes(max_train_bytes * 32, true);
 
     let db = Arc::new(rocksdb::DB::open(&opt, dbpath)?);
 
