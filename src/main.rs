@@ -167,7 +167,7 @@ pub fn run<const N: usize>() -> Result<()> {
     We've empirically tuned the dicionary size to twice of that 'typical' size.
     Having train data size x100 from dictionary size is a recommendation from RocksDB.
     See: https://rocksdb.org/blog/2021/05/31/dictionary-compression.html?utm_source=dbplatz
-     */
+    */
     let dict_size = 2 * 16384;
     let max_train_bytes = dict_size * 128;
 
@@ -182,6 +182,13 @@ pub fn run<const N: usize>() -> Result<()> {
     opt.set_bottommost_compression_type(DBCompressionType::Zstd);
     opt.set_bottommost_compression_options(-14, 32767, 0, dict_size * 32, true);
     opt.set_bottommost_zstd_max_train_bytes(max_train_bytes * 32, true);
+    opt.set_enable_blob_files(true);
+    opt.set_min_blob_size(4096);
+    opt.set_blob_file_size(268435456);
+    opt.set_blob_compression_type(DBCompressionType::Zstd);
+    opt.set_enable_blob_gc(true);
+    opt.set_blob_gc_age_cutoff(0.25);
+    opt.set_blob_gc_force_threshold(0.8);
 
     let db = Arc::new(rocksdb::DB::open(&opt, dbpath)?);
 

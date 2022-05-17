@@ -15,7 +15,9 @@ persy = { version = "1.2.6", features = ["background_ops"] }
 r2d2 = "0.8.9"
 rand = "0.8.5"
 rayon = "1.5.3"
-rocksdb = { version = "0.18.0", features = ["zstd"], default-features = false }
+rocksdb = { path = "./lib/rust-rocksdb", features = [
+  "zstd"
+], default-features = false }
 rusty-leveldb = "0.3.6"
 sled = "0.34.7"
 yakv = "0.2.7"
