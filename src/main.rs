@@ -152,7 +152,8 @@ pub fn run<const N: usize>() -> Result<()> {
     println!("\n# {filename}");
     let dbpath = dir.join(filename);
     let _ = remove_dir_all(&dbpath);
-    let mut opt = rocksdb::Options::default();
+    use rocksdb::{DBCompactionStyle, DBCompressionType, Options};
+    let mut opt = Options::default();
     opt.create_if_missing(true);
     opt.set_max_open_files(10000);
     opt.set_use_fsync(false);
@@ -165,9 +166,15 @@ pub fn run<const N: usize>() -> Result<()> {
     opt.set_min_write_buffer_number_to_merge(4);
     opt.set_level_zero_stop_writes_trigger(2000);
     opt.set_level_zero_slowdown_writes_trigger(0);
-    opt.set_compaction_style(rocksdb::DBCompactionStyle::Universal);
+    opt.set_compaction_style(DBCompactionStyle::Universal);
     opt.set_max_background_jobs(4);
     opt.set_disable_auto_compactions(true);
+    opt.set_compression_type(DBCompressionType::Zstd);
+    opt.set_bottommost_compression_type(DBCompressionType::Zstd);
+    opt.set_bottommost_zstd_max_train_bytes(1 << 18, true); // 256KB
+    opt.set_zstd_max_train_bytes(1 << 18); // 256KB
+    opt.set_compression_options(4, 5, 6, 1 << 14);
+
     let db = Arc::new(rocksdb::DB::open(&opt, dbpath)?);
 
     elapsed!(insert, |kv| -> Result<()> {
