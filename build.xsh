@@ -22,6 +22,8 @@ TARGET=f'{platform.machine()}-{system}'
 
 NAME="benchmark_rust_embed_database"
 
+$EXTRA_CXXFLAGS="-DZSTD_STATIC_LINKING_ONLY"
+
 cargo build \
 --release \
 -Z build-std=std,panic_abort \
