@@ -1,6 +1,3 @@
 [submodule "lib/agatedb"]
 	path = lib/agatedb
 	url = git@github.com:tikv/agatedb.git
-[submodule "lib/rust-rocksdb"]
-	path = lib/rust-rocksdb
-	url = git@github.com:rust-rocksdb/rust-rocksdb.git
