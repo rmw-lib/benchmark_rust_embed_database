@@ -53,6 +53,7 @@ pub fn run<const N: usize>() -> Result<()> {
         }};
     }
 
+    /*
     {
         use nebari::{
             tree::{Root, Unversioned},
@@ -60,18 +61,19 @@ pub fn run<const N: usize>() -> Result<()> {
         };
 
         let filename = "nebari";
-        println!("\n# {nebari}");
+        println!("\n# {filename}");
         let dbpath = dir.join(filename);
         let _ = remove_dir_all(&dbpath);
         let root = Config::default_for(dbpath).open()?;
-        let db = roots.tree(Unversioned::tree("config")).unwrap();
+        let db = root.tree(Unversioned::tree("config")).unwrap();
 
         elapsed!(insert, |kv| -> Result<()> {
             let [k, v] = kv;
-            db.set(&k.to_be_bytes(), &v.to_le_bytes())?;
+            let k = k.to_be_bytes();
+            let v = v.to_le_bytes();
+            db.set(k, v)?;
             Ok(())
         });
-        /*
 
         elapsed!(get, |kv| -> Result<()> {
             let [k, _] = kv;
@@ -80,8 +82,8 @@ pub fn run<const N: usize>() -> Result<()> {
             }
             Ok(())
         });
-        */
     }
+        */
 
     {
         use yakv::storage::{Select, Storage, StorageConfig};
@@ -184,6 +186,7 @@ pub fn run<const N: usize>() -> Result<()> {
         let mut opt = Options::default();
         opt.create_if_missing(true);
         opt.set_use_fsync(false);
+        opt.set_manual_wal_flush(true);
         opt.set_compaction_style(DBCompactionStyle::Universal);
         opt.set_max_background_jobs(8);
         opt.set_disable_auto_compactions(false);

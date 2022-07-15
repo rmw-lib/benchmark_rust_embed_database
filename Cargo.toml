@@ -9,7 +9,6 @@ anyhow = "1.0.58"
 btree-slab = "0.4.0"
 dashmap = "5.3.4"
 duckdb = { version = "0.4.0", features = ["bundled", "r2d2"] }
-nebari = "0.5.4"
 num_cpus = "1.13.1"
 parking_lot = "0.12.1"
 persy = { version = "1.3.1", features = ["background_ops"] }
