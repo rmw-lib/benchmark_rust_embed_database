@@ -54,6 +54,36 @@ pub fn run<const N: usize>() -> Result<()> {
     }
 
     {
+        use nebari::{
+            tree::{Root, Unversioned},
+            Config,
+        };
+
+        let filename = "nebari";
+        println!("\n# {nebari}");
+        let dbpath = dir.join(filename);
+        let _ = remove_dir_all(&dbpath);
+        let root = Config::default_for(dbpath).open()?;
+        let db = roots.tree(Unversioned::tree("config")).unwrap();
+
+        elapsed!(insert, |kv| -> Result<()> {
+            let [k, v] = kv;
+            db.set(&k.to_be_bytes(), &v.to_le_bytes())?;
+            Ok(())
+        });
+        /*
+
+        elapsed!(get, |kv| -> Result<()> {
+            let [k, _] = kv;
+            if let Some(i) = db.get(&k.to_be_bytes().to_vec())? {
+                n_add!(i)
+            }
+            Ok(())
+        });
+        */
+    }
+
+    {
         use yakv::storage::{Select, Storage, StorageConfig};
 
         let filename = "yakv";
@@ -155,7 +185,7 @@ pub fn run<const N: usize>() -> Result<()> {
         opt.create_if_missing(true);
         opt.set_use_fsync(false);
         opt.set_compaction_style(DBCompactionStyle::Universal);
-        opt.set_max_background_jobs(4);
+        opt.set_max_background_jobs(8);
         opt.set_disable_auto_compactions(false);
         opt.increase_parallelism(num_cpus::get() as _);
         opt.set_keep_log_file_num(16);
