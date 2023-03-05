@@ -1,6 +1,7 @@
 #![feature(try_trait_v2)]
 
 use anyhow::Result;
+use lmdb::Transaction;
 use parking_lot::Mutex;
 use rand::Rng;
 use rayon::prelude::*;
@@ -9,7 +10,7 @@ use std::sync::Arc;
 use std::{
     collections::{BTreeMap, HashMap},
     env,
-    fs::{remove_dir_all, remove_file},
+    fs::{create_dir, remove_dir_all, remove_file},
     mem::MaybeUninit,
     time::Instant,
 };
@@ -335,6 +336,39 @@ pub fn run<const N: usize>() -> Result<()> {
             if let Some(i) = db.get(&k) {
                 n_add!(i.to_le_bytes());
             }
+            Ok(())
+        });
+    }
+
+    {
+        let filename = "lmdb";
+        println!("\n# {filename}");
+        let dbpath = dir.join(filename);
+        let _ = remove_dir_all(&dbpath);
+        let _ = create_dir(dbpath.clone());
+        let env = lmdb::Environment::new().open(&dbpath)?;
+        let db = env.open_db(None)?;
+
+        elapsed!(insert, |kv| -> Result<()> {
+            let [k, v] = kv;
+            let mut txn = env.begin_rw_txn()?;
+            txn.put(
+                db,
+                &k.to_be_bytes(),
+                &v.to_le_bytes(),
+                lmdb::WriteFlags::empty(),
+            )?;
+            txn.commit()?;
+            Ok(())
+        });
+        elapsed!(get, |kv| -> Result<()> {
+            let [k, _] = kv;
+            let txn = env.begin_rw_txn()?;
+            {
+                let i = txn.get(db, &k.to_be_bytes())?;
+                n_add!(i);
+            }
+            txn.commit()?;
             Ok(())
         });
     }
