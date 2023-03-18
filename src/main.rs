@@ -238,6 +238,38 @@ pub fn run<const N: usize>() -> Result<()> {
             Ok(())
         });
     }
+
+    {
+        let filename = "rocksdb-transaction";
+        println!("\n# {filename}");
+        let dbpath = dir.join(filename);
+        let _ = remove_dir_all(&dbpath);
+
+        let db: Arc<rocksdb::TransactionDB> =
+            Arc::new(rocksdb::TransactionDB::open_default(dbpath)?);
+        // let db = Arc::new(rocksdb::DB::open(&opt, dbpath)?);
+
+        let mut write_opts = rocksdb::WriteOptions::new();
+        write_opts.set_sync(true);
+        let txn_opts = rocksdb::TransactionOptions::new();
+
+        elapsed!(insert, |kv| -> Result<()> {
+            let txn = db.transaction_opt(&write_opts, &txn_opts);
+            let [k, v] = kv;
+            txn.put(&k.to_be_bytes(), &v.to_le_bytes())?;
+            txn.commit()?;
+            Ok(())
+        });
+
+        elapsed!(get, |kv| -> Result<()> {
+            let [k, _] = kv;
+            if let Some(i) = db.get_pinned(&k.to_be_bytes())? {
+                n_add!(i)
+            }
+            Ok(())
+        });
+    }
+
     {
         use persy::{Config, Persy, TransactionConfig, ValueMode};
         let filename = "persy";
