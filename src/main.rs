@@ -393,6 +393,24 @@ pub fn run<const N: usize>() -> Result<()> {
             txn.commit()?;
             Ok(())
         });
+
+        let mut txn = env.begin_rw_txn()?;
+        elapsed!(
+            insert_bulk,
+            |kv| -> Result<()> {
+                let [k, v] = kv;
+                txn.put(
+                    db,
+                    &k.to_be_bytes(),
+                    &v.to_le_bytes(),
+                    lmdb::WriteFlags::empty(),
+                )?;
+                Ok(())
+            },
+            iter
+        );
+        txn.commit()?;
+
         elapsed!(get, |kv| -> Result<()> {
             let [k, _] = kv;
             let txn = env.begin_ro_txn()?;
