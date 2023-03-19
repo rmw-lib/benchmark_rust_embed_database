@@ -261,6 +261,18 @@ pub fn run<const N: usize>() -> Result<()> {
             Ok(())
         });
 
+        let txn = db.transaction_opt(&write_opts, &txn_opts);
+        elapsed!(
+            insert_bulk,
+            |kv| -> Result<()> {
+                let [k, v] = kv;
+                txn.put(&k.to_be_bytes(), &v.to_le_bytes())?;
+                Ok(())
+            },
+            iter
+        );
+        txn.commit()?;
+
         elapsed!(get, |kv| -> Result<()> {
             let [k, _] = kv;
             if let Some(i) = db.get_pinned(&k.to_be_bytes())? {
