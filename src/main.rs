@@ -395,7 +395,7 @@ pub fn run<const N: usize>() -> Result<()> {
         });
         elapsed!(get, |kv| -> Result<()> {
             let [k, _] = kv;
-            let txn = env.begin_rw_txn()?;
+            let txn = env.begin_ro_txn()?;
             {
                 let i = txn.get(db, &k.to_be_bytes())?;
                 n_add!(i);
